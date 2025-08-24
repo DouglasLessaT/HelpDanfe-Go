@@ -43,3 +43,7 @@ func (b *Boleto) ToDTO() dto.BoletoDTO {
 		UpdatedAt:      b.UpdatedAt,
 	}
 }
+// TableName garante o nome correto da tabela para Boleto
+func (Boleto) TableName() string {
+	return "boletos"
+}

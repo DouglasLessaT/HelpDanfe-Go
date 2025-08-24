@@ -81,3 +81,9 @@ func (n *NFe) ToDTO() dto.NFeDTO {
 		UpdatedAt:        n.UpdatedAt,
 	}
 }
+
+// TableName garante o nome correto da tabela para NFe
+func (NFe) TableName() string {
+	return "nfes"
+}
+

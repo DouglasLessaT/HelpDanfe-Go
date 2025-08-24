@@ -29,3 +29,8 @@ func (d *Duplicata) ToDTO() dto.DuplicataDTO {
 		UpdatedAt:  d.UpdatedAt,
 	}
 }
+
+// TableName garante o nome correto da tabela para Duplicata
+func (Duplicata) TableName() string {
+	return "duplicatas"
+}

@@ -1,0 +1,27 @@
+table_schema = CURRENT_SCHEMA() AND table_name = 'nfes'
+2025-08-24 12:00:09 
+2025-08-24 12:00:09 2025/08/24 15:00:09 /app/internal/database/database.go:38 insufficient arguments
+2025-08-24 12:00:09 [0.639ms] [rows:-] SELECT * FROM "nfes" LIMIT 1
+2025-08-24 12:00:09 {"level":"fatal","msg":"Erro ao executar migrações: insufficient arguments","time":"2025-08-24T15:00:09Z"}
+2025-08-24 12:00:16 
+2025-08-24 12:00:16 2025/08/24 15:00:16 /app/internal/database/database.go:38
+2025-08-24 12:00:16 [27.178ms] [rows:1] SELECT count(*) FROM information_schema.tables WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'nfes' AND table_type = 'BASE TABLE'
+2025-08-24 12:00:16 
+2025-08-24 12:00:16 2025/08/24 15:00:16 /app/internal/database/database.go:38
+2025-08-24 12:00:16 [0.751ms] [rows:1] SELECT CURRENT_DATABASE()
+2025-08-24 12:00:16 
+2025-08-24 12:00:16 2025/08/24 15:00:16 /app/internal/database/database.go:38
+2025-08-24 12:00:16 [76.014ms] [rows:-] SELECT c.column_name, c.is_nullable = 'YES', c.udt_name, c.character_maximum_length, c.numeric_precision, c.numeric_precision_radix, c.numeric_scale, c.datetime_precision, 8 * typlen, c.column_default, pd.description, c.identity_increment FROM information_schema.columns AS c JOIN pg_type AS pgt ON c.udt_name = pgt.typname LEFT JOIN pg_catalog.pg_description as pd ON pd.objsubid = c.ordinal_position AND pd.objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = c.table_name AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = c.table_schema)) where table_catalog = 'helpdanfe' AND table_schema = CURRENT_SCHEMA() AND table_name = 'nfes'
+2025-08-24 12:00:16 
+2025-08-24 12:00:16 2025/08/24 15:00:16 /app/internal/database/database.go:38 insufficient arguments
+2025-08-24 12:00:16 [0.657ms] [rows:-] SELECT * FROM "nfes" LIMIT 1
+2025-08-24 12:00:16 {"level":"fatal","msg":"Erro ao executar migrações: insufficient arguments","time":"2025-08-24T15:00:16Z"}
+2025-08-24 12:00:29 
+2025-08-24 12:00:29 2025/08/24 15:00:29 /app/internal/database/database.go:38
+2025-08-24 12:00:29 [36.429ms] [rows:1] SELECT count(*) FROM information_schema.tables WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'nfes' AND table_type = 'BASE TABLE'
+2025-08-24 12:00:29 
+2025-08-24 12:00:29 2025/08/24 15:00:29 /app/internal/database/database.go:38
+2025-08-24 12:00:29 [2.487ms] [rows:1] SELECT CURRENT_DATABASE()
+2025-08-24 12:00:29 
+2025-08-24 12:00:29 2025/08/24 15:00:29 /app/internal/database/database.go:38
+2025-08-24 12:00:29 [65.150ms] [rows:-] SELECT c.column_name, c.is_nullable = 'YES', c.udt_name, c.character_maximum_length, c.numeric_precision, c.numeric_precision_radix, c.numeric_scale, c.datetime_precision, 8 * typlen, c.column_default, pd.description, c.identity_increment FROM information_schema.columns AS c JOIN pg_type AS pgt ON c.udt_name = pgt.typname LEFT JOIN pg_catalog.pg_description as pd ON pd.objsubid = c.ordinal_position AND pd.objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = c.table_name AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = c.table_schema)) where table_catalog = 'helpdanfe' AND table_schema = CURRENT_SCHEMA() AND table_name = 'nfes'
