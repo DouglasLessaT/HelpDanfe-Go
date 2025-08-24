@@ -144,6 +144,18 @@ exec_db() {
     docker-compose exec postgres "$@"
 }
 
+# Função para testar o banco de dados
+test_db() {
+    print_header
+    print_message "Testando banco de dados..."
+    if [ -f "./scripts/test-db.sh" ]; then
+        chmod +x ./scripts/test-db.sh
+        ./scripts/test-db.sh
+    else
+        print_error "Script de teste do banco não encontrado"
+    fi
+}
+
 # Função para mostrar ajuda
 show_help() {
     print_header
@@ -157,6 +169,7 @@ show_help() {
     echo "  logs [svc]  - Mostra logs (todos ou de um serviço específico)"
     echo "  rebuild     - Faz rebuild de todos os serviços"
     echo "  clean       - Remove todos os containers, volumes e imagens"
+    echo "  test-db     - Testa a conexão com o banco de dados"
     echo "  exec-app    - Executa comando no container da aplicação"
     echo "  exec-db     - Executa comando no container do banco"
     echo "  help        - Mostra esta ajuda"
@@ -164,6 +177,7 @@ show_help() {
     echo "Exemplos:"
     echo "  $0 start"
     echo "  $0 logs app"
+    echo "  $0 test-db"
     echo "  $0 exec-app go test ./..."
     echo "  $0 exec-db psql -U postgres -d helpdanfe"
 }
@@ -196,6 +210,9 @@ case "$1" in
         ;;
     clean)
         clean
+        ;;
+    test-db)
+        test_db
         ;;
     exec-app)
         shift

@@ -84,6 +84,6 @@ func (n *NFe) ToDTO() dto.NFeDTO {
 
 // TableName garante o nome correto da tabela para NFe
 func (NFe) TableName() string {
-	return "nfes"
+	return "nfe"
 }
 

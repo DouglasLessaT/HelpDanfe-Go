@@ -6,42 +6,59 @@
 -- Tabela de NFe
 CREATE TABLE IF NOT EXISTS nfe (
     id SERIAL PRIMARY KEY,
-    chave VARCHAR(44) UNIQUE NOT NULL,
-    numero VARCHAR(9) NOT NULL,
-    serie VARCHAR(3) NOT NULL,
-    data_emissao TIMESTAMP NOT NULL,
-    valor_total DECIMAL(15,2) NOT NULL,
+    chave_acesso VARCHAR(44) UNIQUE NOT NULL,
+    numero VARCHAR(9),
+    serie VARCHAR(3),
+    data_emissao TIMESTAMP,
+    data_autorizacao TIMESTAMP,
     status VARCHAR(20) DEFAULT 'pendente',
-    xml_content TEXT,
+    ambiente VARCHAR(20),
+    uf VARCHAR(2),
+    xml TEXT,
+    pdf BYTEA,
+    emitente_cnpj VARCHAR(18),
+    emitente_nome VARCHAR(255),
+    emitente_ie VARCHAR(20),
+    destinatario_cnpj VARCHAR(18),
+    destinatario_nome VARCHAR(255),
+    destinatario_ie VARCHAR(20),
+    valor_total DECIMAL(15,2),
+    valor_produtos DECIMAL(15,2),
+    valor_impostos DECIMAL(15,2),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP
 );
 
 -- Tabela de Boletos
 CREATE TABLE IF NOT EXISTS boletos (
     id SERIAL PRIMARY KEY,
-    codigo_barras VARCHAR(44) UNIQUE NOT NULL,
-    linha_digitavel VARCHAR(47) NOT NULL,
-    valor DECIMAL(15,2) NOT NULL,
-    data_vencimento DATE NOT NULL,
-    banco VARCHAR(10) NOT NULL,
-    agencia VARCHAR(10),
-    conta VARCHAR(20),
-    nosso_numero VARCHAR(20),
+    nfe_id INTEGER,
+    duplicata_id INTEGER,
+    banco VARCHAR(10),
+    numero VARCHAR(20),
+    codigo_barras VARCHAR(44),
+    linha_digitavel VARCHAR(47),
+    valor DECIMAL(15,2),
+    vencimento TIMESTAMP,
     status VARCHAR(20) DEFAULT 'pendente',
-    nfe_id INTEGER REFERENCES nfe(id),
+    data_pagamento TIMESTAMP,
+    valor_pago DECIMAL(15,2),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP
 );
 
 -- Tabela de Duplicatas
 CREATE TABLE IF NOT EXISTS duplicatas (
     id SERIAL PRIMARY KEY,
-    numero VARCHAR(20) NOT NULL,
-    data_vencimento DATE NOT NULL,
-    valor DECIMAL(15,2) NOT NULL,
-    nfe_id INTEGER REFERENCES nfe(id),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    nfe_id INTEGER,
+    numero VARCHAR(20),
+    vencimento TIMESTAMP,
+    valor DECIMAL(15,2),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP
 );
 
 -- Tabela de Certificados
@@ -54,7 +71,8 @@ CREATE TABLE IF NOT EXISTS certificados (
     data_validade DATE NOT NULL,
     ativo BOOLEAN DEFAULT true,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP
 );
 
 -- Tabela de Logs de Consulta
@@ -66,18 +84,25 @@ CREATE TABLE IF NOT EXISTS logs_consulta (
     tempo_execucao INTEGER, -- em milissegundos
     status VARCHAR(20) NOT NULL,
     erro TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP
 );
 
 -- Índices para melhorar performance
-CREATE INDEX IF NOT EXISTS idx_nfe_chave ON nfe(chave);
+CREATE INDEX IF NOT EXISTS idx_nfe_chave ON nfe(chave_acesso);
 CREATE INDEX IF NOT EXISTS idx_nfe_numero_serie ON nfe(numero, serie);
-CREATE INDEX IF NOT EXISTS idx_boletos_codigo ON boletos(codigo_barras);
 CREATE INDEX IF NOT EXISTS idx_boletos_nfe ON boletos(nfe_id);
+CREATE INDEX IF NOT EXISTS idx_boletos_codigo ON boletos(codigo_barras);
 CREATE INDEX IF NOT EXISTS idx_duplicatas_nfe ON duplicatas(nfe_id);
 CREATE INDEX IF NOT EXISTS idx_certificados_cnpj ON certificados(cnpj);
 CREATE INDEX IF NOT EXISTS idx_logs_tipo ON logs_consulta(tipo_consulta);
 CREATE INDEX IF NOT EXISTS idx_logs_created_at ON logs_consulta(created_at);
+
+-- Índices para soft delete
+CREATE INDEX IF NOT EXISTS idx_nfe_deleted_at ON nfe(deleted_at);
+CREATE INDEX IF NOT EXISTS idx_boletos_deleted_at ON boletos(deleted_at);
+CREATE INDEX IF NOT EXISTS idx_duplicatas_deleted_at ON duplicatas(deleted_at);
+CREATE INDEX IF NOT EXISTS idx_certificados_deleted_at ON certificados(deleted_at);
 
 -- Função para atualizar o timestamp de updated_at
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -93,6 +118,9 @@ CREATE TRIGGER update_nfe_updated_at BEFORE UPDATE ON nfe
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TRIGGER update_boletos_updated_at BEFORE UPDATE ON boletos
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_duplicatas_updated_at BEFORE UPDATE ON duplicatas
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TRIGGER update_certificados_updated_at BEFORE UPDATE ON certificados
