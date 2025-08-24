@@ -4,6 +4,7 @@ services:
   # Aplicação principal
   app:
     build: .
+    container_name: helpdanfe-app
     environment:
       - ENVIRONMENT=development
       - DB_HOST=postgres
@@ -14,9 +15,13 @@ services:
       - DB_SSL_MODE=disable
       - SEFAZ_AMBIENTE=homologacao
       - SEFAZ_UF=SP
+      - CORS_ALLOWED_ORIGIN=http://localhost:3000,http://127.0.0.1:3000
+      - REDIS_URL=redis://redis:6379
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     volumes:
       - ./logs:/root/logs
       - ./certs:/root/certs
@@ -24,63 +29,107 @@ services:
       - helpdanfe-network
     expose:
       - "8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
 
   # Banco de dados PostgreSQL
   postgres:
     image: postgres:15-alpine
+    container_name: helpdanfe-postgres
     environment:
       - POSTGRES_DB=helpdanfe
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --lc-collate=C --lc-ctype=C
     ports:
       - "55432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     networks:
       - helpdanfe-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d helpdanfe"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
 
   # Redis para cache
   redis:
     image: redis:7-alpine
+    container_name: helpdanfe-redis
+    command: redis-server --appendonly yes --requirepass password
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
     networks:
       - helpdanfe-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
 
   # pgAdmin para gerenciar PostgreSQL (opcional)
   pgadmin:
     image: dpage/pgadmin4:latest
+    container_name: helpdanfe-pgadmin
     environment:
       - PGADMIN_DEFAULT_EMAIL=admin@helpdanfe.com
       - PGADMIN_DEFAULT_PASSWORD=admin
+      - PGADMIN_CONFIG_SERVER_MODE=False
     ports:
       - "5050:80"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       - helpdanfe-network
+    restart: unless-stopped
 
-
+  # Nginx como proxy reverso
   nginx:
     image: nginx:alpine
+    container_name: helpdanfe-nginx
     ports:
       - "3000:80"
     volumes:
       - ./web:/usr/share/nginx/html:ro
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./logs/nginx:/var/log/nginx
     depends_on:
-      - app
+      app:
+        condition: service_healthy
     networks:
       - helpdanfe-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
 
 volumes:
   postgres_data:
+    driver: local
   redis_data:
+    driver: local
 
 networks:
   helpdanfe-network:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
 

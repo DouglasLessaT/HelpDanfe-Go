@@ -1,148 +1,129 @@
 # Makefile para HelpDanfe-Go
 
+.PHONY: help build run test clean docker-build docker-run docker-stop docker-logs docker-clean
+
 # Variáveis
-BINARY_NAME=helpdanfe-go
-BUILD_DIR=build
-MAIN_FILE=cmd/server/main.go
+APP_NAME=helpdanfe-go
+BINARY_NAME=main
+DOCKER_IMAGE=helpdanfe-go
+DOCKER_TAG=latest
 
-# Comandos principais
-.PHONY: all build clean test run dev docker-build docker-run help
+# Comandos padrão
+help: ## Mostra esta ajuda
+	@echo "Comandos disponíveis:"
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
-all: clean build
-
-# Compilar a aplicação
-build:
+# Desenvolvimento local
+build: ## Compila a aplicação Go
 	@echo "Compilando aplicação..."
-	@mkdir -p $(BUILD_DIR)
-	@go build -o $(BUILD_DIR)/$(BINARY_NAME) $(MAIN_FILE)
-	@echo "Aplicação compilada em $(BUILD_DIR)/$(BINARY_NAME)"
+	@go build -o bin/$(BINARY_NAME) cmd/server/main.go
 
-# Limpar arquivos de build
-clean:
-	@echo "Limpando arquivos de build..."
-	@rm -rf $(BUILD_DIR)
-	@go clean
+run: build ## Compila e executa a aplicação localmente
+	@echo "Executando aplicação..."
+	@./bin/$(BINARY_NAME)
 
-# Executar testes
-test:
+test: ## Executa os testes
 	@echo "Executando testes..."
 	@go test -v ./...
 
-# Executar testes com coverage
-test-coverage:
-	@echo "Executando testes com coverage..."
+test-coverage: ## Executa testes com cobertura
+	@echo "Executando testes com cobertura..."
 	@go test -v -coverprofile=coverage.out ./...
 	@go tool cover -html=coverage.out -o coverage.html
-	@echo "Relatório de coverage gerado em coverage.html"
+	@echo "Relatório de cobertura gerado: coverage.html"
 
-# Executar a aplicação
-run: build
-	@echo "Executando aplicação..."
-	@./$(BUILD_DIR)/$(BINARY_NAME)
+clean: ## Remove arquivos compilados
+	@echo "Limpando arquivos..."
+	@rm -rf bin/
+	@rm -f coverage.out coverage.html
 
-# Executar em modo desenvolvimento
-dev:
-	@echo "Executando em modo desenvolvimento..."
-	@go run $(MAIN_FILE)
+# Docker
+docker-build: ## Constrói a imagem Docker
+	@echo "Construindo imagem Docker..."
+	@docker build -t $(DOCKER_IMAGE):$(DOCKER_TAG) .
 
-# Instalar dependências
-deps:
+docker-run: docker-build ## Constrói e executa com Docker Compose
+	@echo "Iniciando serviços com Docker Compose..."
+	@docker-compose up -d
+
+docker-stop: ## Para os serviços Docker
+	@echo "Parando serviços Docker..."
+	@docker-compose down
+
+docker-logs: ## Mostra logs dos serviços
+	@echo "Mostrando logs..."
+	@docker-compose logs -f
+
+docker-clean: ## Remove containers, volumes e imagens
+	@echo "Limpando Docker..."
+	@docker-compose down -v --rmi all
+	@docker system prune -f
+
+# Desenvolvimento
+dev-setup: ## Configura ambiente de desenvolvimento
+	@echo "Configurando ambiente de desenvolvimento..."
+	@mkdir -p logs/nginx certs web/css web/js
+	@if [ ! -f .env ]; then cp env.example .env; echo "Arquivo .env criado. Configure as variáveis necessárias."; fi
+
+dev-start: dev-setup ## Inicia ambiente de desenvolvimento
+	@echo "Iniciando ambiente de desenvolvimento..."
+	@./scripts/manage.sh start
+
+dev-stop: ## Para ambiente de desenvolvimento
+	@echo "Parando ambiente de desenvolvimento..."
+	@./scripts/manage.sh stop
+
+dev-logs: ## Mostra logs do ambiente de desenvolvimento
+	@echo "Mostrando logs..."
+	@./scripts/manage.sh logs
+
+# Dependências
+deps: ## Instala/atualiza dependências Go
 	@echo "Instalando dependências..."
 	@go mod tidy
 	@go mod download
 
-# Verificar dependências
-deps-check:
-	@echo "Verificando dependências..."
-	@go mod verify
+deps-update: ## Atualiza dependências para versões mais recentes
+	@echo "Atualizando dependências..."
+	@go get -u ./...
+	@go mod tidy
 
-# Executar linter
-lint:
+# Linting e formatação
+lint: ## Executa linter
 	@echo "Executando linter..."
-	@golangci-lint run
+	@if command -v golangci-lint >/dev/null 2>&1; then \
+		golangci-lint run; \
+	else \
+		echo "golangci-lint não encontrado. Instale com: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest"; \
+	fi
 
-# Formatar código
-fmt:
+fmt: ## Formata código Go
 	@echo "Formatando código..."
 	@go fmt ./...
 
-# Gerar documentação
-docs:
-	@echo "Gerando documentação..."
-	@swag init -g $(MAIN_FILE) -o docs
+fmt-check: ## Verifica se o código está formatado
+	@echo "Verificando formatação..."
+	@if [ "$$(gofmt -l . | wc -l)" -gt 0 ]; then \
+		echo "Código não está formatado. Execute 'make fmt'"; \
+		exit 1; \
+	fi
 
-# Criar diretórios necessários
-setup:
-	@echo "Criando diretórios necessários..."
-	@mkdir -p logs
-	@mkdir -p certs
-	@mkdir -p build
+# Deploy
+deploy-prepare: test lint fmt-check ## Prepara para deploy (testa, lint e formata)
+	@echo "Preparação para deploy concluída!"
 
-# Instalar ferramentas de desenvolvimento
-install-tools:
-	@echo "Instalando ferramentas de desenvolvimento..."
-	@go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
-	@go install github.com/swaggo/swag/cmd/swag@latest
+# Utilitários
+status: ## Mostra status dos serviços
+	@echo "Status dos serviços:"
+	@./scripts/manage.sh status
 
-# Docker
-docker-build:
-	@echo "Construindo imagem Docker..."
-	@docker build -t $(BINARY_NAME) .
+shell: ## Acessa shell do container da aplicação
+	@echo "Acessando shell do container..."
+	@docker-compose exec app sh
 
-docker-run:
-	@echo "Executando container Docker..."
-	@docker run -p 8080:8080 $(BINARY_NAME)
+db-shell: ## Acessa shell do container do banco
+	@echo "Acessando shell do banco..."
+	@docker-compose exec postgres psql -U postgres -d helpdanfe
 
-# Migração do banco de dados
-migrate:
-	@echo "Executando migrações..."
-	@go run $(MAIN_FILE) migrate
-
-# Seed do banco de dados
-seed:
-	@echo "Executando seed do banco..."
-	@go run $(MAIN_FILE) seed
-
-# Backup do banco de dados
-backup:
-	@echo "Fazendo backup do banco..."
-	@pg_dump -h localhost -U postgres helpdanfe > backup_$(shell date +%Y%m%d_%H%M%S).sql
-
-# Restaurar backup do banco de dados
-restore:
-	@echo "Restaurando backup do banco..."
-	@psql -h localhost -U postgres helpdanfe < $(BACKUP_FILE)
-
-# Verificar saúde da aplicação
-health:
-	@echo "Verificando saúde da aplicação..."
-	@curl -f http://localhost:8080/api/v1/health || echo "Aplicação não está respondendo"
-
-# Testar frontend
-frontend:
-	@echo "Testando frontend..."
-	@./scripts/test-frontend.sh
-
-# Monitorar logs
-logs:
-	@echo "Monitorando logs..."
-	@tail -f logs/app.log
-
-# Ajuda
-help:
-	@echo "Comandos disponíveis:"
-	@echo "  build        - Compilar a aplicação"
-	@echo "  clean        - Limpar arquivos de build"
-	@echo "  test         - Executar testes"
-	@echo "  run          - Executar a aplicação"
-	@echo "  dev          - Executar em modo desenvolvimento"
-	@echo "  deps         - Instalar dependências"
-	@echo "  lint         - Executar linter"
-	@echo "  fmt          - Formatar código"
-	@echo "  setup        - Criar diretórios necessários"
-	@echo "  docker-build - Construir imagem Docker"
-	@echo "  docker-run   - Executar container Docker"
-	@echo "  migrate      - Executar migrações"
-	@echo "  health       - Verificar saúde da aplicação"
-	@echo "  frontend     - Testar frontend"
-	@echo "  help         - Mostrar esta ajuda"
+# Comando padrão
+.DEFAULT_GOAL := help

@@ -1,6 +1,6 @@
-.
-
-# Binários
+# Binários compilados
+bin/
+build/
 *.exe
 *.exe~
 *.dll
@@ -10,60 +10,64 @@
 # Arquivos de teste
 *.test
 *.out
-
-# Arquivos de coverage
 coverage.out
 coverage.html
 
-# Build
-build/
-dist/
-
-# Logs
+# Arquivos de log
 logs/
 *.log
 
-# Certificados digitais
+# Arquivos de certificado
 certs/
 *.p12
 *.pfx
 *.pem
 *.key
-*.crt
 
 # Arquivos de ambiente
 .env
 .env.local
 .env.production
 
-# IDE
+# Arquivos temporários
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Arquivos de IDE
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 
-# OS
+# Arquivos do sistema
 .DS_Store
 Thumbs.db
 
-# Go
-go.sum
-vendor/
-
-# Docker
+# Arquivos de Docker
 .dockerignore
 
-# Backup de banco
-*.sql
-*.dump
+# Arquivos de backup
+*.bak
+*.backup
+*.sql.bak
 
-# Cache
+# Arquivos de cache
 .cache/
-tmp/
+*.cache
 
-# Arquivos temporários
-*.tmp
-*.temp
+# Arquivos de dependências
+vendor/
+node_modules/
 
-.env
+# Arquivos de build do frontend
+web/dist/
+web/build/
+
+# Arquivos de migração
+migrations/*.sql
+
+# Arquivos de configuração local
+config.local.*
