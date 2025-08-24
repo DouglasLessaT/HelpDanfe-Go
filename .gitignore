@@ -14,8 +14,8 @@ coverage.out
 coverage.html
 
 # Arquivos de log
-logs/
-*.log
+# logs/
+# *.log
 
 # Arquivos de certificado
 certs/
