@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  # Aplicação principal
+  app:
+    build: .
+    environment:
+      - ENVIRONMENT=development
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - DB_NAME=helpdanfe
+      - DB_SSL_MODE=disable
+      - SEFAZ_AMBIENTE=homologacao
+      - SEFAZ_UF=SP
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - ./logs:/root/logs
+      - ./certs:/root/certs
+    networks:
+      - helpdanfe-network
+    expose:
+      - "8080"
+
+  # Banco de dados PostgreSQL
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=helpdanfe
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    ports:
+      - "55432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - helpdanfe-network
+
+  # Redis para cache
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - helpdanfe-network
+
+  # pgAdmin para gerenciar PostgreSQL (opcional)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@helpdanfe.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - helpdanfe-network
+
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "3000:80"
+    volumes:
+      - ./web:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - app
+    networks:
+      - helpdanfe-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  helpdanfe-network:
+    driver: bridge
+
