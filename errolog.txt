@@ -1,27 +1,103 @@
-table_schema = CURRENT_SCHEMA() AND table_name = 'nfes'
-2025-08-24 12:00:09 
-2025-08-24 12:00:09 2025/08/24 15:00:09 /app/internal/database/database.go:38 insufficient arguments
-2025-08-24 12:00:09 [0.639ms] [rows:-] SELECT * FROM "nfes" LIMIT 1
-2025-08-24 12:00:09 {"level":"fatal","msg":"Erro ao executar migrações: insufficient arguments","time":"2025-08-24T15:00:09Z"}
-2025-08-24 12:00:16 
-2025-08-24 12:00:16 2025/08/24 15:00:16 /app/internal/database/database.go:38
-2025-08-24 12:00:16 [27.178ms] [rows:1] SELECT count(*) FROM information_schema.tables WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'nfes' AND table_type = 'BASE TABLE'
-2025-08-24 12:00:16 
-2025-08-24 12:00:16 2025/08/24 15:00:16 /app/internal/database/database.go:38
-2025-08-24 12:00:16 [0.751ms] [rows:1] SELECT CURRENT_DATABASE()
-2025-08-24 12:00:16 
-2025-08-24 12:00:16 2025/08/24 15:00:16 /app/internal/database/database.go:38
-2025-08-24 12:00:16 [76.014ms] [rows:-] SELECT c.column_name, c.is_nullable = 'YES', c.udt_name, c.character_maximum_length, c.numeric_precision, c.numeric_precision_radix, c.numeric_scale, c.datetime_precision, 8 * typlen, c.column_default, pd.description, c.identity_increment FROM information_schema.columns AS c JOIN pg_type AS pgt ON c.udt_name = pgt.typname LEFT JOIN pg_catalog.pg_description as pd ON pd.objsubid = c.ordinal_position AND pd.objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = c.table_name AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = c.table_schema)) where table_catalog = 'helpdanfe' AND table_schema = CURRENT_SCHEMA() AND table_name = 'nfes'
-2025-08-24 12:00:16 
-2025-08-24 12:00:16 2025/08/24 15:00:16 /app/internal/database/database.go:38 insufficient arguments
-2025-08-24 12:00:16 [0.657ms] [rows:-] SELECT * FROM "nfes" LIMIT 1
-2025-08-24 12:00:16 {"level":"fatal","msg":"Erro ao executar migrações: insufficient arguments","time":"2025-08-24T15:00:16Z"}
-2025-08-24 12:00:29 
-2025-08-24 12:00:29 2025/08/24 15:00:29 /app/internal/database/database.go:38
-2025-08-24 12:00:29 [36.429ms] [rows:1] SELECT count(*) FROM information_schema.tables WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'nfes' AND table_type = 'BASE TABLE'
-2025-08-24 12:00:29 
-2025-08-24 12:00:29 2025/08/24 15:00:29 /app/internal/database/database.go:38
-2025-08-24 12:00:29 [2.487ms] [rows:1] SELECT CURRENT_DATABASE()
-2025-08-24 12:00:29 
-2025-08-24 12:00:29 2025/08/24 15:00:29 /app/internal/database/database.go:38
-2025-08-24 12:00:29 [65.150ms] [rows:-] SELECT c.column_name, c.is_nullable = 'YES', c.udt_name, c.character_maximum_length, c.numeric_precision, c.numeric_precision_radix, c.numeric_scale, c.datetime_precision, 8 * typlen, c.column_default, pd.description, c.identity_increment FROM information_schema.columns AS c JOIN pg_type AS pgt ON c.udt_name = pgt.typname LEFT JOIN pg_catalog.pg_description as pd ON pd.objsubid = c.ordinal_position AND pd.objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = c.table_name AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = c.table_schema)) where table_catalog = 'helpdanfe' AND table_schema = CURRENT_SCHEMA() AND table_name = 'nfes'
+2025/08/24 15:32:31 Arquivo .env não encontrado, usando variáveis de ambiente do sistema
+2025/08/24 15:32:31 Conectando ao banco de dados: postgres:5432/helpdanfe
+2025/08/24 15:32:31 Conexão com banco estabelecida com sucesso
+2025/08/24 15:32:31 Iniciando migrações do banco de dados...
+2025/08/24 15:32:31 Migrando modelo: *models.NFe
+
+2025/08/24 15:32:31 /app/internal/database/database.go:57
+[10.186ms] [rows:1] SELECT count(*) FROM information_schema.tables WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'nfe' AND table_type = 'BASE TABLE'
+
+2025/08/24 15:32:31 /app/internal/database/database.go:57
+[17.854ms] [rows:0] CREATE TABLE "nfe" ("id" bigserial,"chave_acesso" text NOT NULL,"numero" text,"serie" text,"data_emissao" timestamptz,"data_autorizacao" timestamptz,"status" text,"ambiente" text,"uf" text,"xml" text,"pdf" bytea,"emitente_cnpj" text,"emitente_nome" text,"emitente_ie" text,"destinatario_cnpj" text,"destinatario_nome" text,"destinatario_ie" text,"valor_total" decimal,"valor_produtos" decimal,"valor_impostos" decimal,"created_at" timestamptz,"updated_at" timestamptz,"deleted_at" timestamptz,PRIMARY KEY ("id"))
+
+2025/08/24 15:32:31 /app/internal/database/database.go:57
+[6.402ms] [rows:0] CREATE INDEX IF NOT EXISTS "idx_nfe_deleted_at" ON "nfe" ("deleted_at")
+
+2025/08/24 15:32:31 /app/internal/database/database.go:57
+[7.566ms] [rows:0] CREATE UNIQUE INDEX IF NOT EXISTS "idx_nfe_chave_acesso" ON "nfe" ("chave_acesso")
+
+2025/08/24 15:32:31 /app/internal/database/database.go:57
+[1.166ms] [rows:1] SELECT count(*) FROM information_schema.tables WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'nfe' AND table_type = 'BASE TABLE'
+
+2025/08/24 15:32:31 /app/internal/database/database.go:57
+[0.286ms] [rows:1] SELECT CURRENT_DATABASE()
+
+2025/08/24 15:32:31 /app/internal/database/database.go:57
+[16.814ms] [rows:-] SELECT c.column_name, c.is_nullable = 'YES', c.udt_name, c.character_maximum_length, c.numeric_precision, c.numeric_precision_radix, c.numeric_scale, c.datetime_precision, 8 * typlen, c.column_default, pd.description, c.identity_increment FROM information_schema.columns AS c JOIN pg_type AS pgt ON c.udt_name = pgt.typname LEFT JOIN pg_catalog.pg_description as pd ON pd.objsubid = c.ordinal_position AND pd.objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = c.table_name AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = c.table_schema)) where table_catalog = 'helpdanfe' AND table_schema = CURRENT_SCHEMA() AND table_name = 'nfe'
+
+2025/08/24 15:32:31 /app/internal/database/database.go:57 insufficient arguments
+[0.151ms] [rows:-] SELECT * FROM "nfe" LIMIT 1
+{"level":"fatal","msg":"Erro ao executar migrações: erro ao migrar modelo *models.Duplicata: insufficient arguments","time":"2025-08-24T15:32:31Z"}
+
+2025/08/24 15:32:32 /app/internal/database/database.go:57
+[15.505ms] [rows:1] SELECT count(*) FROM information_schema.tables WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'nfe' AND table_type = 'BASE TABLE'
+
+2025/08/24 15:32:32 /app/internal/database/database.go:57
+[0.446ms] [rows:1] SELECT CURRENT_DATABASE()
+
+2025/08/24 15:32:32 /app/internal/database/database.go:57
+[20.327ms] [rows:-] SELECT c.column_name, c.is_nullable = 'YES', c.udt_name, c.character_maximum_length, c.numeric_precision, c.numeric_precision_radix, c.numeric_scale, c.datetime_precision, 8 * typlen, c.column_default, pd.description, c.identity_increment FROM information_schema.columns AS c JOIN pg_type AS pgt ON c.udt_name = pgt.typname LEFT JOIN pg_catalog.pg_description as pd ON pd.objsubid = c.ordinal_position AND pd.objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = c.table_name AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = c.table_schema)) where table_catalog = 'helpdanfe' AND table_schema = CURRENT_SCHEMA() AND table_name = 'nfe'
+
+2025/08/24 15:32:32 /app/internal/database/database.go:57 insufficient arguments
+[0.233ms] [rows:-] SELECT * FROM "nfe" LIMIT 1
+{"level":"fatal","msg":"Erro ao executar migrações: erro ao migrar modelo *models.NFe: insufficient arguments","time":"2025-08-24T15:32:32Z"}
+
+2025/08/24 15:32:32 /app/internal/database/database.go:57
+[10.644ms] [rows:1] SELECT count(*) FROM information_schema.tables WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'nfe' AND table_type = 'BASE TABLE'
+
+2025/08/24 15:32:32 /app/internal/database/database.go:57
+[0.408ms] [rows:1] SELECT CURRENT_DATABASE()
+
+2025/08/24 15:32:32 /app/internal/database/database.go:57
+[20.767ms] [rows:-] SELECT c.column_name, c.is_nullable = 'YES', c.udt_name, c.character_maximum_length, c.numeric_precision, c.numeric_precision_radix, c.numeric_scale, c.datetime_precision, 8 * typlen, c.column_default, pd.description, c.identity_increment FROM information_schema.columns AS c JOIN pg_type AS pgt ON c.udt_name = pgt.typname LEFT JOIN pg_catalog.pg_description as pd ON pd.objsubid = c.ordinal_position AND pd.objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = c.table_name AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = c.table_schema)) where table_catalog = 'helpdanfe' AND table_schema = CURRENT_SCHEMA() AND table_name = 'nfe'
+
+2025/08/24 15:32:32 /app/internal/database/database.go:57 insufficient arguments
+[0.230ms] [rows:-] SELECT * FROM "nfe" LIMIT 1
+{"level":"fatal","msg":"Erro ao executar migrações: erro ao migrar modelo *models.NFe: insufficient arguments","time":"2025-08-24T15:32:32Z"}
+2025/08/24 15:32:31 Modelo *models.NFe migrado com sucesso
+2025/08/24 15:32:31 Migrando modelo: *models.Duplicata
+2025/08/24 15:32:32 Arquivo .env não encontrado, usando variáveis de ambiente do sistema
+2025/08/24 15:32:32 Conectando ao banco de dados: postgres:5432/helpdanfe
+2025/08/24 15:32:32 Conexão com banco estabelecida com sucesso
+2025/08/24 15:32:32 Iniciando migrações do banco de dados...
+2025/08/24 15:32:32 Migrando modelo: *models.NFe
+2025/08/24 15:32:32 Arquivo .env não encontrado, usando variáveis de ambiente do sistema
+2025/08/24 15:32:32 Conectando ao banco de dados: postgres:5432/helpdanfe
+2025/08/24 15:32:32 Conexão com banco estabelecida com sucesso
+2025/08/24 15:32:32 Iniciando migrações do banco de dados...
+2025/08/24 15:32:32 Migrando modelo: *models.NFe
+2025/08/24 15:32:33 Arquivo .env não encontrado, usando variáveis de ambiente do sistema
+2025/08/24 15:32:33 Conectando ao banco de dados: postgres:5432/helpdanfe
+2025/08/24 15:32:33 Conexão com banco estabelecida com sucesso
+2025/08/24 15:32:33 Iniciando migrações do banco de dados...
+2025/08/24 15:32:33 Migrando modelo: *models.NFe
+2025/08/24 15:32:34 Arquivo .env não encontrado, usando variáveis de ambiente do sistema
+2025/08/24 15:32:34 Conectando ao banco de dados: postgres:5432/helpdanfe
+2025/08/24 15:32:34 Conexão com banco estabelecida com sucesso
+2025/08/24 15:32:34 Iniciando migrações do banco de dados...
+2025/08/24 15:32:34 Migrando modelo: *models.NFe
+2025/08/24 15:32:36 Arquivo .env não encontrado, usando variáveis de ambiente do sistema
+2025/08/24 15:32:36 Conectando ao banco de dados: postgres:5432/helpdanfe
+2025/08/24 15:32:36 Conexão com banco estabelecida com sucesso
+2025/08/24 15:32:36 Iniciando migrações do banco de dados...
+2025/08/24 15:32:36 Migrando modelo: *models.NFe
+2025/08/24 15:32:40 Arquivo .env não encontrado, usando variáveis de ambiente do sistema
+2025/08/24 15:32:40 Conectando ao banco de dados: postgres:5432/helpdanfe
+2025/08/24 15:32:40 Conexão com banco estabelecida com sucesso
+2025/08/24 15:32:40 Iniciando migrações do banco de dados...
+2025/08/24 15:32:40 Migrando modelo: *models.NFe
+2025/08/24 15:32:46 Arquivo .env não encontrado, usando variáveis de ambiente do sistema
+2025/08/24 15:32:46 Conectando ao banco de dados: postgres:5432/helpdanfe
+2025/08/24 15:32:46 Conexão com banco estabelecida com sucesso
+2025/08/24 15:32:46 Iniciando migrações do banco de dados...
+2025/08/24 15:32:46 Migrando modelo: *models.NFe
+2025/08/24 15:32:59 Arquivo .env não encontrado, usando variáveis de ambiente do sistema
+2025/08/24 15:32:59 Conectando ao banco de dados: postgres:5432/helpdanfe
+2025/08/24 15:32:59 Conexão com banco estabelecida com sucesso
+2025/08/24 15:32:59 Iniciando migrações do banco de dados...
+2025/08/24 15:32:59 Migrando modelo: *models.NFe
+2025/08/24 15:33:25 Arquivo .env não encontrado, usando variáveis de ambiente do sistema
+2025/08/24 15:33:25 Conectando ao banco de dados: postgres:5432/helpdanfe
+2025/08/24 15:33:25 Conexão com banco estabelecida com sucesso
+2025/08/24 15:33:25 Iniciando migrações do banco de dados...
+2025/08/24 15:33:25 Migrando modelo: *models.NFe
