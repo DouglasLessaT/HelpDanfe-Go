@@ -156,6 +156,18 @@ test_db() {
     fi
 }
 
+# Função para testar o frontend
+test_frontend() {
+    print_header
+    print_message "Testando frontend..."
+    if [ -f "./scripts/test-frontend.sh" ]; then
+        chmod +x ./scripts/test-frontend.sh
+        ./scripts/test-frontend.sh
+    else
+        print_error "Script de teste do frontend não encontrado"
+    fi
+}
+
 # Função para mostrar ajuda
 show_help() {
     print_header
@@ -170,6 +182,7 @@ show_help() {
     echo "  rebuild     - Faz rebuild de todos os serviços"
     echo "  clean       - Remove todos os containers, volumes e imagens"
     echo "  test-db     - Testa a conexão com o banco de dados"
+    echo "  test-frontend - Testa o frontend e arquivos estáticos"
     echo "  exec-app    - Executa comando no container da aplicação"
     echo "  exec-db     - Executa comando no container do banco"
     echo "  help        - Mostra esta ajuda"
@@ -178,6 +191,7 @@ show_help() {
     echo "  $0 start"
     echo "  $0 logs app"
     echo "  $0 test-db"
+    echo "  $0 test-frontend"
     echo "  $0 exec-app go test ./..."
     echo "  $0 exec-db psql -U postgres -d helpdanfe"
 }
@@ -213,6 +227,9 @@ case "$1" in
         ;;
     test-db)
         test_db
+        ;;
+    test-frontend)
+        test_frontend
         ;;
     exec-app)
         shift
