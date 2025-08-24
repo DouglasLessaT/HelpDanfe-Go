@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HelpDanfe - Consulta de NFes e Boletos</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Menu Lateral -->
+    <!-- <div id="menu-left" class="menu-left-fechado">
+        <table class="menu-left">
+            <tr>
+                <td>
+                    <a href="#" onclick="showSection('consulta-nfe')" class="menu-item active">
+                        <i class="fas fa-search"></i> Consultar NFe
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <a href="#" onclick="showSection('boletos')" class="menu-item">
+                        <i class="fas fa-barcode"></i> Consultar Boletos
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <a href="#" onclick="showSection('historico')" class="menu-item">
+                        <i class="fas fa-history"></i> Histórico
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <a href="#" onclick="showSection('configuracoes')" class="menu-item">
+                        <i class="fas fa-cog"></i> Configurações
+                    </a>
+                </td>
+            </tr>
+        </table>
+    </div> -->
+
+    <!-- Conteúdo Principal -->
+    <div id="content" class="content-fechado">
+        <!-- Header -->
+        <div class="header">
+            <!-- <div class="menu-toggle" onclick="menu()">
+                <i class="fas fa-bars"></i>
+            </div> -->
+            <div class="header-title">
+                <h1>HelpDanfe</h1>
+                <p>Sistema de Consulta de NFes e Boletos</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-primary" onclick="showSection('consulta-nfe')">
+                    <i class="fas fa-plus"></i> Nova Consulta
+                </button>
+            </div>
+        </div>
+
+        <!-- Seção de Consulta de NFe -->
+        <div id="consulta-nfe" class="section active">
+            <div class="section-header">
+                <h2><i class="fas fa-search"></i> Consultar NFe</h2>
+                <p>Digite a chave de acesso da NFe para consultar os dados e localizar boletos vinculados</p>
+            </div>
+
+            <div class="form-container">
+                <form id="nfe-form" onsubmit="consultarNFe(event)">
+                    <div class="form-group">
+                        <label for="chave-acesso">Chave de Acesso (44 dígitos)</label>
+                        <input type="text" id="chave-acesso" name="chave-acesso" maxlength="44" 
+                               placeholder="12345678901234567890123456789012345678901234" required>
+                        <small>Digite a chave de acesso completa da NFe</small>
+                    </div>
+
+                    <!-- Status do Certificado Digital -->
+                    <div class="form-group">
+                        <label>Certificado Digital</label>
+                        <div class="certificado-container">
+                            <div id="certificado-status" class="certificado-status">
+                                <i class="fas fa-certificate"></i>
+                                <span>Verificando certificados...</span>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-secondary" onclick="selecionarCertificado()">
+                                <i class="fas fa-search"></i> Selecionar Certificado
+                            </button>
+                        </div>
+                        <small>O sistema tentará usar automaticamente certificados instalados no sistema operacional</small>
+                    </div>
+
+                    <!-- Opção de usar certificado de arquivo -->
+                    <!-- <div class="form-group">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="usar-certificado-arquivo" onchange="toggleCertificadoArquivo()">
+                            <span class="checkmark"></span>
+                            Usar certificado de arquivo (.p12/.pfx)
+                        </label>
+                    </div> -->
+
+                    <div id="certificado-arquivo-container" class="certificado-arquivo-container" style="display: none;">
+                        <div class="form-group">
+                            <label for="certificado">Arquivo do Certificado</label>
+                            <input type="file" id="certificado" name="certificado" accept=".p12,.pfx">
+                            <small>Arquivo .p12 ou .pfx do certificado digital</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="senha-certificado">Senha do Certificado</label>
+                            <input type="password" id="senha-certificado" name="senha-certificado">
+                            <small>Senha do certificado digital</small>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Consultar NFe
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="limparFormulario()">
+                            <i class="fas fa-eraser"></i> Limpar
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Resultado da Consulta -->
+            <div id="resultado-nfe" class="resultado-container" style="display: none;">
+                <div class="resultado-header">
+                    <h3><i class="fas fa-file-invoice"></i> Dados da NFe</h3>
+                    <div class="resultado-actions">
+                        <button class="btn btn-sm btn-secondary" onclick="baixarXML()">
+                            <i class="fas fa-download"></i> Baixar XML
+                        </button>
+                        <button class="btn btn-sm btn-secondary" onclick="gerarPDF()">
+                            <i class="fas fa-file-pdf"></i> Gerar PDF
+                        </button>
+                    </div>
+                </div>
+                <div id="dados-nfe" class="resultado-content"></div>
+            </div>
+
+            <!-- Boletos da NFe -->
+            <div id="boletos-nfe" class="resultado-container" style="display: none;">
+                <div class="resultado-header">
+                    <h3><i class="fas fa-barcode"></i> Boletos Vinculados</h3>
+                </div>
+                <div id="dados-boletos" class="resultado-content"></div>
+            </div>
+        </div>
+
+        <!-- Seção de Consulta de Boletos -->
+        <div id="boletos" class="section">
+            <div class="section-header">
+                <h2><i class="fas fa-barcode"></i> Consultar Boletos</h2>
+                <p>Consulte boletos específicos ou múltiplos boletos</p>
+            </div>
+
+            <div class="form-container">
+                <form id="boletos-form" onsubmit="consultarBoletos(event)">
+                    <div class="form-group">
+                        <label for="codigos-boletos">Códigos dos Boletos</label>
+                        <textarea id="codigos-boletos" name="codigos-boletos" rows="4" 
+                                  placeholder="Digite um código por linha&#10;Exemplo:&#10;BOL001&#10;BOL002&#10;BOL003" required></textarea>
+                        <small>Digite um código de boleto por linha</small>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Consultar Boletos
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="limparFormularioBoletos()">
+                            <i class="fas fa-eraser"></i> Limpar
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Resultado dos Boletos -->
+            <div id="resultado-boletos" class="resultado-container" style="display: none;">
+                <div class="resultado-header">
+                    <h3><i class="fas fa-list"></i> Resultado da Consulta</h3>
+                </div>
+                <div id="dados-boletos-consulta" class="resultado-content"></div>
+            </div>
+        </div>
+
+        <!-- Seção de Histórico -->
+        <div id="historico" class="section">
+            <div class="section-header">
+                <h2><i class="fas fa-history"></i> Histórico de Consultas</h2>
+                <p>Visualize consultas realizadas anteriormente</p>
+            </div>
+
+            <div class="historico-container">
+                <div class="historico-filtros">
+                    <div class="form-group">
+                        <label for="filtro-data">Filtrar por Data</label>
+                        <input type="date" id="filtro-data" onchange="filtrarHistorico()">
+                    </div>
+                    <div class="form-group">
+                        <label for="filtro-tipo">Filtrar por Tipo</label>
+                        <select id="filtro-tipo" onchange="filtrarHistorico()">
+                            <option value="">Todos</option>
+                            <option value="nfe">NFe</option>
+                            <option value="boleto">Boleto</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="historico-lista" class="historico-lista">
+                    <!-- Histórico será carregado dinamicamente -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção de Configurações -->
+        <div id="configuracoes" class="section">
+            <div class="section-header">
+                <h2><i class="fas fa-cog"></i> Configurações</h2>
+                <p>Configure as preferências do sistema</p>
+            </div>
+
+            <div class="config-container">
+                <div class="config-group">
+                    <h3>Configurações da API</h3>
+                    <div class="form-group">
+                        <label for="api-url">URL da API</label>
+                        <input type="url" id="api-url" value="http://localhost:8080/api/v1">
+                    </div>
+                    <div class="form-group">
+                        <label for="timeout">Timeout (segundos)</label>
+                        <input type="number" id="timeout" value="30" min="5" max="120">
+                    </div>
+                </div>
+
+                <div class="config-group">
+                    <h3>Configurações de Certificado</h3>
+                    <div class="form-group">
+                        <label for="cert-path">Caminho do Certificado</label>
+                        <input type="text" id="cert-path" placeholder="/path/to/certificate.p12">
+                    </div>
+                    <div class="form-group">
+                        <label for="cert-password">Senha do Certificado</label>
+                        <input type="password" id="cert-password">
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-primary" onclick="salvarConfiguracoes()">
+                        <i class="fas fa-save"></i> Salvar Configurações
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="restaurarConfiguracoes()">
+                        <i class="fas fa-undo"></i> Restaurar Padrão
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading" class="loading" style="display: none;">
+        <div class="loading-spinner"></div>
+        <p>Processando...</p>
+    </div>
+
+    <!-- Modal de Erro -->
+    <div id="modal-erro" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-exclamation-triangle"></i> Erro</h3>
+                <span class="close" onclick="fecharModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p id="erro-mensagem"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="fecharModal()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
