@@ -100,7 +100,3 @@ O sistema utiliza PostgreSQL para armazenar:
 ```bash
 go test ./...
 ```
-
-## 📝 Licença
-
-MIT License
